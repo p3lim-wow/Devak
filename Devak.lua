@@ -25,7 +25,7 @@ local function OnClick(self, button)
 	end
 end
 
-local function OnUpdate(self, event, slot)
+local function OnUpdate(slot)
 	local button = buttons[slot]
 	local exists, _, start, duration = GetTotemInfo(slot)
 
@@ -60,9 +60,19 @@ for index = 1, 4 do
 	button.swirly:SetReverse()
 
 	buttons[index] = button
-	OnUpdate(nil, nil, index)
+end
+
+local function OnEvent(self, event, ...)
+	if(event == 'PLAYER_TOTEM_UPDATE') then
+		OnUpdate(...)
+	else
+		for index = 1, 4 do
+			OnUpdate(index)
+		end
+	end
 end
 
 local addon = CreateFrame('Frame')
 addon:RegisterEvent('PLAYER_TOTEM_UPDATE')
-addon:SetScript('OnEvent', OnUpdate)
+addon:RegisterEvent('PLAYER_ENTERING_WORLD')
+addon:SetScript('OnEvent', OnEvent)

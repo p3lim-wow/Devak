@@ -11,6 +11,7 @@
 
 if(select(2, UnitClass('player')) ~= 'SHAMAN') then return end
 
+local NAME = ...
 local buttons = {}
 local coords = {
 	{68/128, 96/128, 102/256, 128/256},
@@ -64,15 +65,18 @@ end
 
 local function OnEvent(self, event, ...)
 	if(event == 'PLAYER_TOTEM_UPDATE') then
-		OnUpdate(...)
-	else
-		for index = 1, 4 do
-			OnUpdate(index)
-		end
+		return OnUpdate(...)
+	end
+
+	local name = ...
+	if(name and name ~= NAME) then return end
+
+	for index = 1, 4 do
+		OnUpdate(index)
 	end
 end
 
 local addon = CreateFrame('Frame')
 addon:RegisterEvent('PLAYER_TOTEM_UPDATE')
-addon:RegisterEvent('PLAYER_ENTERING_WORLD')
+addon:RegisterEvent(IsAddOnLoaded('AddonLoader') and 'ADDON_LOADED' or 'PLAYER_ENTERING_WORLD')
 addon:SetScript('OnEvent', OnEvent)

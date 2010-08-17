@@ -4,4 +4,8 @@
 ## Title: Devak
 ## Notes: Simple totem management
 
+## LoadManagers: AddonLoader
+## X-LoadOn-Class: Shaman
+## X-LoadOn-Always: delayed
+
 Devak.lua

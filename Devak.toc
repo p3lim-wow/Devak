@@ -1,11 +1,7 @@
-## Interface: 30300
+## Interface: 40000
 ## Author: p3lim
 ## Version: Alpha
 ## Title: Devak
 ## Notes: Simple totem management
-
-## LoadManagers: AddonLoader
-## X-LoadOn-Class: Shaman
-## X-LoadOn-Always: delayed
 
 Devak.lua

@@ -11,8 +11,7 @@
 
 if(select(2, UnitClass('player')) ~= 'SHAMAN') then return end
 
-local NAME = ...
-local buttons = {}
+local buttons
 local coords = {
 	{68/128, 96/128, 102/256, 128/256},
 	{67/128, 95/128, 5/256, 31/256},
@@ -20,10 +19,8 @@ local coords = {
 	{67/128, 95/128, 38/256, 64/256},
 }
 
-local function OnClick(self, button)
-	if(button == 'RightButton') then
-		DestroyTotem(self.id)
-	end
+local function OnClick(self)
+	DestroyTotem(self:GetID())
 end
 
 local function OnUpdate(slot)
@@ -38,45 +35,43 @@ local function OnUpdate(slot)
 	end
 end
 
-for index = 1, 4 do
-	local button = CreateFrame('Button', nil, UIParent)
-	button:SetHeight(23)
-	button:SetWidth(23)
-	button:SetNormalTexture([=[Interface\Buttons\UI-TotemBar]=])
-	button:GetNormalTexture():SetTexCoord(unpack(coords[index]))
-	button:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {left = -1, right = -1, top = -1, bottom = -1}})
-	button:SetBackdropColor(0, 0, 0)
-	button:RegisterForClicks('RightButtonUp')
-	button:SetScript('OnClick', OnClick)
-	button.id = index
+local Devak = CreateFrame('Frame')
+Devak:RegisterEvent('PLAYER_TOTEM_UPDATE')
+Devak:RegisterEvent('PLAYER_ENTERING_WORLD')
+Devak:SetScript('OnEvent', function(self, event, ...)
+	if(not buttons) then
+		buttons = {}
 
-	if(index == 1) then
-		button:SetPoint('TOPLEFT', Minimap, 'BOTTOMLEFT', -1, -8)
-	else
-		button:SetPoint('TOPLEFT', buttons[index -1], 'TOPRIGHT', 11.5, 0)
+		for index = 1, 4 do
+			local button = CreateFrame('Button', nil, UIParent)
+			button:SetSize(23, 23)
+			button:SetNormalTexture([=[Interface\Buttons\UI-TotemBar]=])
+			button:GetNormalTexture():SetTexCoord(unpack(coords[index]))
+			button:SetBackdrop({bgFile = [=[Interface\ChatFrame\ChatFrameBackground]=], insets = {left = -1, right = -1, top = -1, bottom = -1}})
+			button:SetBackdropColor(0, 0, 0)
+			button:RegisterForClicks('RightButtonUp')
+			button:SetScript('OnClick', OnClick)
+			button:SetID(index)
+
+			if(index == 1) then
+				button:SetPoint('TOPLEFT', Minimap, 'BOTTOMLEFT', -1, -8)
+			else
+				button:SetPoint('TOPLEFT', buttons[index - 1], 'TOPRIGHT', 11.5, 0)
+			end
+
+			button.swirly = CreateFrame('Cooldown', nil, button)
+			button.swirly:SetAllPoints(button)
+			button.swirly:SetReverse()
+
+			buttons[index] = button
+		end
 	end
 
-	button.swirly = CreateFrame('Cooldown', nil, button)
-	button.swirly:SetAllPoints(button)
-	button.swirly:SetReverse()
-
-	buttons[index] = button
-end
-
-local function OnEvent(self, event, ...)
 	if(event == 'PLAYER_TOTEM_UPDATE') then
 		return OnUpdate(...)
 	end
 
-	local name = ...
-	if(name and name ~= NAME) then return end
-
 	for index = 1, 4 do
 		OnUpdate(index)
 	end
-end
-
-local addon = CreateFrame('Frame')
-addon:RegisterEvent('PLAYER_TOTEM_UPDATE')
-addon:RegisterEvent(IsAddOnLoaded('AddonLoader') and 'ADDON_LOADED' or 'PLAYER_ENTERING_WORLD')
-addon:SetScript('OnEvent', OnEvent)
+end)
